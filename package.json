@@ -6,7 +6,9 @@
     "dependencies": {
         "express": "latest",
         "ejs": "latest",
-        "stripe": "latest"
+        "stripe": "latest",
+        "mongodb": "latest",
+        "q": "latest"
     },
 
     "engines": {

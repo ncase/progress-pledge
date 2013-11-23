@@ -33,104 +33,85 @@
 </style>
 
 <div id="form">
+	<form id="progress_pledge" action="/pledge" method="POST">
 
-	<div class="header">
-		Hi! What's your name? (If you want to be credited in the leaderboard)
-	</div>
-	<input type="text" name="backer_name" class="text_input" placeholder="Anonymous"></input>
-	
-	<br><br>
+		<!-- HIDDEN INPUTS -->
+		<input style="display:none" name="stripeToken"></input>
 
-	<div class="header">
-		What's your email? <i>(Please double check!)</i>
-	</div>
-	<!--You will only be sent notifications if/when a part of your pledge is claimed.-->
-	<input type="email" name="backer_email" class="text_input" placeholder="your@email.com"></input>
+		<!-- BACKER INFORMATION -->
 
-	
-	<br><br><hr><br>
+		<div class="header">
+			Hi! What's your name? (If you want to be credited in the leaderboard)
+		</div>
+		<input type="text" name="backer_name" class="text_input" placeholder="Anonymous"></input>
+		
+		<br><br>
 
-	<div class="header">
-		How would you like to split up your Progress Pledge?
-	</div>
-	<input type="radio" name="split" value="quarter" checked> 25% upfront, 25% for alpha, 25% for beta, 25% for full game
-	<br>
-	<input type="radio" name="split" value="half"> 50% upfront, 50% for full game
-	<br>
-	<input type="radio" name="split" value="all"> 100% upfront
+		<div class="header">
+			What's your email? <i>(Please double check!)</i>
+		</div>
+		<!--You will only be sent notifications if/when a part of your pledge is claimed.-->
+		<input type="email" name="backer_email" class="text_input" placeholder="your@email.com"></input>
+		
+		<br><br><hr><br>
 
-	<br><br>
+		<!-- PLEDGE INFORMATION -->
 
-	<div class="header">
-		How much would you like to pledge in total?
-	</div>
-	<input type="radio" name="total" value="10" checked> $10
-	<br>
-	<input type="radio" name="total" value="25"> $25
-	<br>
-	<input type="radio" name="total" value="50"> $50
-	<br>
-	<input type="radio" name="total" value="100"> $100
-	<br>
-	<input type="radio" name="total" value="custom">
-	$<input type="text" name="total_custom" class="text_input" value="" style="width:200px"></input>
-	
-	<br><br><hr><br>
+		<div class="header">
+			How would you like to split up your Progress Pledge?
+		</div>
+		<input type="radio" name="pledge_split" value="quarter" checked> 25% upfront, 25% for alpha, 25% for beta, 25% for full game
+		<br>
+		<input type="radio" name="pledge_split" value="half"> 50% upfront, 50% for full game
+		<br>
+		<input type="radio" name="pledge_split" value="all"> 100% upfront
 
-	<div class="header">
-		Alright alright alright, let's pledge this!
-		<br>(note: because of the limitations of paypal & bitcoin...)
-	</div>
+		<br><br>
 
-	<div style="overflow:hidden">
-		<div class="button" id="credit_card">Credit Card</div>
-		<div class="button" style="opacity:0.2">PayPal</div>
-		<div class="button" style="opacity:0.2">Bitcoin</div>
-	</div>
+		<div class="header">
+			How much would you like to pledge in total?
+		</div>
+		<input type="radio" name="pledge_total" value="10" checked> $10
+		<br>
+		<input type="radio" name="pledge_total" value="25"> $25
+		<br>
+		<input type="radio" name="pledge_total" value="50"> $50
+		<br>
+		<input type="radio" name="pledge_total" value="100"> $100
+		<br>
+		<input type="radio" name="pledge_total" value="custom">
+		$<input type="text" name="pledge_total_custom" class="text_input" value="" style="width:200px"></input>
+		($2 minimum, due to Stripe's minimum limit)
+		
+		<br><br><hr><br>
 
+		<!-- PAYMENT METHODS -->
+
+		<div class="header">
+			Alright alright alright, let's pledge this!
+			<br>(note: because of the limitations of paypal & bitcoin...)
+		</div>
+
+		<div style="overflow:hidden">
+			<div class="button" id="credit_card">Credit Card</div>
+			<div class="button" style="opacity:0.2">PayPal</div>
+			<div class="button" style="opacity:0.2">Bitcoin</div>
+		</div>
+
+	</form>
 </div>
-
-<form style="display:none" id="progress_pledge" action="/pledge" method="POST">
-	<input name="stripeToken"></input>
-</form>
 
 
 <script src="https://checkout.stripe.com/checkout.js"></script>
 <script>
 
-function getFormData(){
-
-	var backer_name = document.getElementsByName("backer_name")[0].value;
-	var backer_email = document.getElementsByName("backer_email")[0].value;
-
-	var split = document.querySelector("input[name=split]:checked").value;
-	var total = document.querySelector("input[name=total]:checked").value;
-	var total_custom = document.getElementsByName("total_custom")[0].value;
-
-	return {
-
-		backer: {
-			name: backer_name,
-			email: backer_email
-		},
-
-		amounts: {
-			demo: 1,
-			alpha: 1,
-			beta: 1,
-			done: 1
-		}
-
-	};
-
-}
-
 var handler = StripeCheckout.configure({
-	key: '<%=STRIPE_PUBLIC_KEY%>',
-	image: '/square-image.png',
+	key: "<%=STRIPE_PUBLIC_KEY%>",
+	image: "http://placekitten.com/128/128",
 	token: function(token, args) {
-		document.querySelector("#progress_pledge input[name=stripeToken]").value = token.id;
-		document.querySelector("#progress_pledge").submit();
+		var form = document.querySelector("#progress_pledge");
+		document.querySelector("input[name=stripeToken]").value = token.id;
+		form.submit();
 	}
 });
 

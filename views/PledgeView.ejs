@@ -1,0 +1,117 @@
+<%
+
+var total = 0;
+var claimed = 0;
+for(var stageID in pledge.stages){
+	var stage = pledge.stages[stageID];
+	total += stage.amount;
+	if(stage.status=="claimed"){
+		claimed += stage.amount;
+	}
+}
+
+var ratio_demo = pledge.stages.demo.amount/total;
+var ratio_alpha = pledge.stages.alpha.amount/total;
+var ratio_beta = pledge.stages.beta.amount/total;
+var ratio_done = pledge.stages.done.amount/total;
+
+%>
+
+<!--pre><%=JSON.stringify(pledge,null,4)%></pre-->
+
+<style>
+@import url(http://fonts.googleapis.com/css?family=Raleway:300,600);
+#content {
+	width:800px; margin:100px auto;
+	font-family: Raleway;
+	font-size: 20px;
+}
+#content .header {
+	font-size: 40px;
+	margin-bottom: 15px;
+}
+#bar {
+	width:799px;
+	height:50px;
+	overflow: hidden;
+	margin: 15px 0;
+	position: relative;
+	border-radius: 25px;
+
+	background:#000;
+}
+#bar > div {
+	position: absolute;
+}
+#bar_background {
+
+	width:0%; height:50px;
+	background: #CC2727;
+
+	-webkit-transition: width 1s ease-in-out;
+    -moz-transition: width 1s ease-in-out;
+    -ms-transition: width 1s ease-in-out;
+    -o-transition: width 1s ease-in-out;
+    transition: width 1s ease-in-out;
+
+}
+#bar_sections {
+	width:800px;
+}
+#bar_sections > div{
+	float:left;
+	text-align: center;
+	color:#fff;
+	height:20px;
+	padding: 15px 0;
+	font-size: 15px;
+	position: relative;
+	overflow: hidden;
+}
+#bar_sections > div > div{
+	position: absolute;
+	top:0; bottom:0; left:0; right:0;
+	border-right: 1px dashed #fff;
+}
+#bar_sections > div:last-child > div{
+	border-right: none;
+}
+</style>
+
+<div id="content">
+
+	<div class="header">
+		Thank you, <%=pledge.backer.name%>!
+	</div>
+
+	<b>Your Progress Pledge:</b> ($<%=claimed.toFixed(2)%> claimed out of $<%=total.toFixed(2)%> pledged)
+
+	<div id="bar">
+		<div id="bar_background"></div>
+		<div id="bar_sections">
+			<div style="width:<%=ratio_demo*800%>px">
+				<div></div>
+				$<%=pledge.stages.demo.amount.toFixed(2)%> upfront
+			</div>
+			<div style="width:<%=ratio_alpha*800%>px">
+				<div></div>
+				$<%=pledge.stages.alpha.amount.toFixed(2)%> for the alpha
+			</div>
+			<div style="width:<%=ratio_beta*800%>px">
+				<div></div>
+				$<%=pledge.stages.beta.amount.toFixed(2)%> for the beta
+			</div>
+			<div style="width:<%=ratio_done*800%>px">
+				<div></div>
+				$<%=pledge.stages.done.amount.toFixed(2)%> when complete
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<script>
+window.onload = function(){
+	document.querySelector("#bar_background").style.width = "<%=(claimed/total)*100%>%";
+};
+</script>
