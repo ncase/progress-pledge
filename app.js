@@ -20,26 +20,85 @@ domain.run(function(){
         });
     });
 
-    // Stats
-    app.get("/stats",function(req,res){
+    // Admin Account
+    var auth = express.basicAuth(function(user, pass) {
+        return user===process.env.ADMIN_USER && pass===process.env.ADMIN_PASS;
+    });
+
+    // Admin Dashboard: All pledges
+    app.get("/admin",auth,function(req,res){
         
         mongo.connect(MONGO_URI, function(err, db) {
-            if(err) { return console.dir(err); }
-            
-            db.collection('pledges').aggregate([{
-                $group:{ 
-                    _id:"stages", 
-                    demo:{$sum:"$stages.demo.amount"},
-                    alpha:{$sum:"$stages.alpha.amount"},
-                    beta:{$sum:"$stages.beta.amount"},
-                    done:{$sum:"$stages.done.amount"}
-                }
-            }],function(err,results){
-                if(err) { return console.dir(err); }
-                res.send("<pre>"+JSON.stringify(results,null,4)+"</pre>");
+            if(err) { return console.error(err); }
+            db.collection('pledges').find().toArray(function(err,pledges){
+                if(err) return console.error(err);
+                res.render("AdminDashboard.ejs",{
+                    pledges: pledges
+                });
                 db.close();
             });
+        });
 
+    });
+
+    // Admin: Charge a pledge
+    app.get("/admin/charge/:id",function(req,res){
+
+        var _id = new ObjectID(req.params.id);
+        var query = {_id:_id};
+
+        mongo.connect(MONGO_URI, function(err, db) {
+            if(err){ return console.error(err); }
+            
+            db.collection('pledges').find(query).toArray(function(err,results){
+                if(err) { return console.error(err); }
+                
+                var pledge = results[0];
+                if(!pledge){
+                    db.close();
+                    return res.send("no such pledge");
+                }
+
+                // ONLY IF UNCLAIMED
+                if(pledge.stages.demo.status!=="unclaimed"){
+                    db.close();
+                    return res.send("pledge already claimed");
+                }
+
+                // FIXED: DEMO
+                var chargeAmount = pledge.stages.demo.amount; // in cents
+                var customerID = pledge.customerID;
+
+                // CHARGE THE CUSTOMER THIS AMOUNT
+                stripe.charges.create({
+                    amount: chargeAmount * 100, // amount in cents, again
+                    currency: 'usd',
+                    customer: customerID
+                }).then(function(){
+
+                    var deferred = Q.defer();
+
+                    // MARK AS CLAIMED
+                    db.collection('pledges').update(
+                        query,
+                        { $set:{"stages.demo.status":"claimed"} },
+                        function(err){
+                            if(err) deferred.reject(err);
+                            deferred.resolve(true);
+                        }
+                    );
+
+                    return deferred.promise;
+
+                }).then(function(){
+                    db.close();
+                    res.send(pledge.backer.name+" has been charged $"+chargeAmount.toFixed(2)+"! <pre></pre>");
+                },function(err){
+                    db.close();
+                    res.send(err.message);
+                });
+
+            });
         });
 
     });
@@ -51,10 +110,10 @@ domain.run(function(){
         var query = {_id:_id};
 
         mongo.connect(MONGO_URI, function(err, db) {
-            if(err){ return console.dir(err); }
+            if(err){ return console.error(err); }
             
             db.collection('pledges').find(query).toArray(function(err,results){
-                if(err) { return console.dir(err); }
+                if(err) { return console.error(err); }
                 
                 var pledge = results[0];
                 res.render("PledgeView.ejs",{
@@ -82,7 +141,7 @@ domain.run(function(){
         // Stages
         var ratios;
         var stages = {
-            demo: {amount:0,status:"claimed"},
+            demo: {amount:0,status:"unclaimed"},
             alpha: {amount:0,status:"unclaimed"},
             beta: {amount:0,status:"unclaimed"},
             done: {amount:0,status:"unclaimed"}

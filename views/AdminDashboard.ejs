@@ -1,0 +1,107 @@
+<%
+
+var STAGES = ["demo","alpha","beta","done"];
+
+var aggregation = {
+	demo: { claimed:0, pledged:0 },
+	alpha: { claimed:0, pledged:0 },
+	beta: { claimed:0, pledged:0 },
+	done: { claimed:0, pledged:0 }
+};
+
+var total = { claimed:0, pledged:0 };
+
+pledges.map(function(pledge){
+	for(var j=0;j<STAGES.length;j++){
+		var stageID = STAGES[j];
+		var agg = aggregation[stageID];
+		var stage = pledge.stages[stageID];
+		
+		agg.pledged += stage.amount;
+		total.pledged += stage.amount;
+
+		if(stage.status==="claimed"){
+			agg.claimed += stage.amount;
+			total.claimed += stage.amount;
+		}
+
+	}
+});
+
+%>
+
+<style>
+@import url(http://fonts.googleapis.com/css?family=Raleway:300,600);
+#content {
+	width:800px; margin:100px auto;
+	font-family: Raleway;
+	font-size: 20px;
+}
+hr {
+	border: none;
+	border-bottom: 2px dashed #ddd;
+}
+</style>
+
+<div id="content">
+
+<div style="font-size:25px">
+
+	<%
+	for(var j=0;j<STAGES.length;j++){
+		var stageID = STAGES[j];
+		var stage = aggregation[stageID];
+	%>
+		<b><%=stageID%></b>:
+		(<%=Math.round(100*stage.claimed/stage.pledged)%>%)
+		$<%=stage.claimed.toFixed(2)%> claimed out of $<%=stage.pledged.toFixed(2)%> pledged.
+		<br>
+	<%
+	}
+	%>
+
+	<br>
+	<b>total</b>:
+	(<%=Math.round(100*total.claimed/total.pledged)%>%)
+	$<%=total.claimed.toFixed(2)%> claimed out of $<%=total.pledged.toFixed(2)%> pledged.
+	<br><br>
+
+</div>
+
+<hr><br>
+
+<%
+for(var i=0;i<pledges.length;i++){
+	var pledge = pledges[i];
+%>
+	
+	<b><%=pledge.backer.name%> (<%=pledge.backer.email%>) pledged:</b>
+	<div style="overflow:hidden">
+		<%
+		for(var j=0;j<STAGES.length;j++){
+			var stageID = STAGES[j];
+			var stage = pledge.stages[stageID];
+		%>
+		<div style="width:200px; height:50px; float:left">
+			$<%=stage.amount.toFixed(2)%> - <%=stageID%>
+			<br>
+			<%
+			if(stageID==="demo"){
+				if(stage.status==="unclaimed"){
+					%><a href="/admin/charge/<%=pledge._id%>" target="_blank">CLAIM THIS</a><%
+				}
+				if(stage.status==="claimed"){
+					%>claimed<%
+				}
+			}
+			%>
+		</div>
+		<%}%>
+	</div>
+
+	<br><br>
+
+<%
+}
+%>
+</div>
