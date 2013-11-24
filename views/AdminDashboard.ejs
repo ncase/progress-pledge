@@ -75,7 +75,10 @@ for(var i=0;i<pledges.length;i++){
 	var pledge = pledges[i];
 %>
 	
-	<b><%=pledge.backer.name%> (<%=pledge.backer.email%>) pledged:</b>
+	<b>
+		<%=pledge.backer.name%> (<%=pledge.backer.email%>)
+		<a href="/pledge/<%=pledge._id%>" target="_blank">pledged</a>:
+	</b>
 	<div style="overflow:hidden">
 		<%
 		for(var j=0;j<STAGES.length;j++){
