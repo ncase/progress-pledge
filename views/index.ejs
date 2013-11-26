@@ -78,10 +78,13 @@
 		<input type="radio" name="pledge_total" value="50"> $50
 		<br>
 		<input type="radio" name="pledge_total" value="100"> $100
-		<br>
-		<input type="radio" name="pledge_total" value="custom">
-		$<input type="text" name="pledge_total_custom" class="text_input" value="" style="width:200px"></input>
-		($2 minimum, due to Stripe's minimum limit) // TODO
+
+		<span style="display:none">
+			<br>
+			<input type="radio" name="pledge_total" value="custom">
+			$<input type="text" name="pledge_total_custom" class="text_input" value="" style="width:200px"></input>
+			($2 minimum, due to Stripe's minimum limit)
+		</span>
 		
 		<br><br><hr><br>
 

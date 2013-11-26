@@ -66,7 +66,7 @@ domain.run(function(){
                 }
 
                 // FIXED: DEMO
-                var chargeAmount = pledge.stages.demo.amount; // in cents
+                var chargeAmount = pledge.stages.demo.amount;
                 var customerID = pledge.customerID;
 
                 // CHARGE THE CUSTOMER THIS AMOUNT
@@ -92,7 +92,13 @@ domain.run(function(){
 
                 }).then(function(){
                     db.close();
+
+                    // Email the backer
+                    _sendPledgeClaimedEmail(pledge);
+
+                    // Show page
                     res.send(pledge.backer.name+" has been charged $"+chargeAmount.toFixed(2)+"! <pre></pre>");
+
                 },function(err){
                     db.close();
                     res.send(err.message);
@@ -175,6 +181,9 @@ domain.run(function(){
 
         }).then(function(pledge){
 
+            // Send email
+            _sendPledgeCreatedEmail(pledge);
+
             // Redirect to Pledge's Page
             res.redirect("/pledge/"+pledge._id);
 
@@ -206,6 +215,38 @@ domain.run(function(){
         return deferred.promise;
     };
 
+    // Sendgrid
+    var sendgrid  = require('sendgrid')( process.env.SENDGRID_USERNAME, process.env.SENDGRID_PASSWORD );
 
+    var _sendPledgeCreatedEmail = function(pledge){
+
+        var email = {            
+            to: pledge.backer.email,
+            from: 'nick@commonly.cc',
+            subject: 'Thank you for backing Nothing To Hide',
+            text: 'Your progress pledge page: '+'http://fund.nothingtohide.cc/pledge/'+pledge._id
+        };
+ 
+        sendgrid.send(email, function(success, message) {
+            if(!success) console.log(message);
+        });
+    };
+
+    var _sendPledgeClaimedEmail = function(pledge){
+
+        var email = {
+            to: pledge.backer.email,
+            from: 'nick@commonly.cc',
+            subject: 'Part of your Progress Pledge has been claimed.',
+            text: 'The upfront stage of your pledge has been claimed!\n\n'+
+                'Your card has been charged $'+pledge.stages.demo.amount.toFixed(2)+'\n\n'+
+                'Details: http://fund.nothingtohide.cc/pledge/'+pledge._id
+        };
+
+        sendgrid.send(email, function(success, message) {
+            if(!success) console.log(message);
+        });
+
+    };
 
 });
