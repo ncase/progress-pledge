@@ -1,2 +1,3 @@
 test.env
+live_secrets.env
 node_modules/**/*
