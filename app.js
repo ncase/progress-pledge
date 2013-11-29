@@ -224,7 +224,7 @@ domain.run(function(){
             to: pledge.backer.email,
             from: 'nick@commonly.cc',
             subject: 'Thank you for backing Nothing To Hide',
-            text: 'Your progress pledge page: '+'http://fund.nothingtohide.cc/pledge/'+pledge._id
+            text: 'Your progress pledge page: '+'http://back.nothingtohide.cc/pledge/'+pledge._id
         };
  
         sendgrid.send(email, function(success, message) {
@@ -240,7 +240,7 @@ domain.run(function(){
             subject: 'Part of your Progress Pledge has been claimed.',
             text: 'The upfront stage of your pledge has been claimed!\n\n'+
                 'Your card has been charged $'+pledge.stages.demo.amount.toFixed(2)+'\n\n'+
-                'Details: http://fund.nothingtohide.cc/pledge/'+pledge._id
+                'Details: http://back.nothingtohide.cc/pledge/'+pledge._id
         };
 
         sendgrid.send(email, function(success, message) {
