@@ -30,7 +30,7 @@ domain.run(function(){
         
         mongo.connect(MONGO_URI, function(err, db) {
             if(err) { return console.error(err); }
-            db.collection('pledges').find().toArray(function(err,pledges){
+            db.collection('pledges').find().sort({_id:-1}).toArray(function(err,pledges){
                 if(err) return console.error(err);
                 res.render("AdminDashboard.ejs",{
                     pledges: pledges
@@ -59,7 +59,11 @@ domain.run(function(){
                     return res.send("no such pledge");
                 }
 
-                // ONLY IF UNCLAIMED
+                // ONLY IF UNCLAIMED && STILL ACTIVE
+                if(pledge.status=="cancelled"){
+                    db.close();
+                    return res.send("pledge already cancelled. you did this on purpose");
+                }
                 if(pledge.stages.demo.status!=="unclaimed"){
                     db.close();
                     return res.send("pledge already claimed");
@@ -134,6 +138,30 @@ domain.run(function(){
 
     });
 
+    // Cancel Pledge
+    app.post("/pledge/cancel/:id",function(req,res){
+
+        var _id = new ObjectID(req.params.id);
+        var query = {_id:_id};
+
+        mongo.connect(MONGO_URI, function(err, db) {
+            if(err){ return console.error(err); }
+            
+            // Change pledge status to Cancelled
+            db.collection('pledges').update(
+                query,
+                { $set:{"status":"cancelled"} },
+                function(err){
+                    if(err) deferred.reject(err);
+                    db.close();
+                    res.redirect("/pledge/"+req.params.id);
+                }
+            );
+
+        });
+
+    });
+
     // Pledge with Stripe
     var stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
     app.post("/pledge",function(req,res){
@@ -173,6 +201,7 @@ domain.run(function(){
             // SAVE customer for later
             var pledge = {
                 _id: new ObjectID(),
+                status: "active",
                 backer: backer,
                 stages: stages,
                 customerID: customer.id
@@ -227,8 +256,8 @@ domain.run(function(){
             text: 'Your progress pledge page: '+'http://back.nothingtohide.cc/pledge/'+pledge._id
         };
  
-        sendgrid.send(email, function(success, message) {
-            if(!success) console.log(message);
+        sendgrid.send(email, function(err, message) {
+            if(err) console.log(message);
         });
     };
 
@@ -243,8 +272,8 @@ domain.run(function(){
                 'Details: http://back.nothingtohide.cc/pledge/'+pledge._id
         };
 
-        sendgrid.send(email, function(success, message) {
-            if(!success) console.log(message);
+        sendgrid.send(email, function(err, message) {
+            if(err) console.log(message);
         });
 
     };

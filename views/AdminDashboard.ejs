@@ -17,8 +17,10 @@ pledges.map(function(pledge){
 		var agg = aggregation[stageID];
 		var stage = pledge.stages[stageID];
 		
-		agg.pledged += stage.amount;
-		total.pledged += stage.amount;
+		if(!(stage.status=="unclaimed" && pledge.status=="cancelled")){
+			agg.pledged += stage.amount;
+			total.pledged += stage.amount;
+		}
 
 		if(stage.status==="claimed"){
 			agg.claimed += stage.amount;
@@ -74,35 +76,37 @@ hr {
 for(var i=0;i<pledges.length;i++){
 	var pledge = pledges[i];
 %>
-	
-	<b>
-		<%=pledge.backer.name%> (<%=pledge.backer.email%>)
-		<a href="/pledge/<%=pledge._id%>" target="_blank">pledged</a>:
-	</b>
-	<div style="overflow:hidden">
-		<%
-		for(var j=0;j<STAGES.length;j++){
-			var stageID = STAGES[j];
-			var stage = pledge.stages[stageID];
-		%>
-		<div style="width:200px; height:50px; float:left">
-			$<%=stage.amount.toFixed(2)%> - <%=stageID%>
-			<br>
+	<div <%if(pledge.status=="cancelled"){%>style="opacity:0.5"<%}%>>
+		<b>
+			<%if(pledge.status=="cancelled"){%> [CANCELLED] <%}%>
+			<%=pledge.backer.name%> (<%=pledge.backer.email%>)
+			<a href="/pledge/<%=pledge._id%>" target="_blank">pledged</a>:
+		</b>
+		<div style="overflow:hidden;">
 			<%
-			if(stageID==="demo"){
-				if(stage.status==="unclaimed"){
-					%><a href="/admin/charge/<%=pledge._id%>" target="_blank">CLAIM THIS</a><%
-				}
-				if(stage.status==="claimed"){
-					%>claimed<%
-				}
-			}
+			for(var j=0;j<STAGES.length;j++){
+				var stageID = STAGES[j];
+				var stage = pledge.stages[stageID];
 			%>
+			<div style="width:200px; height:50px; float:left">
+				$<%=stage.amount.toFixed(2)%> - <%=stageID%>
+				<br>
+				<%
+				if(stageID==="demo"){
+					if(stage.status==="unclaimed" && pledge.status=="active"){
+						%><a href="/admin/charge/<%=pledge._id%>" target="_blank">CLAIM THIS</a><%
+					}
+					if(stage.status==="claimed"){
+						%>claimed<%
+					}
+				}
+				%>
+			</div>
+			<%}%>
 		</div>
-		<%}%>
 	</div>
 
-	<br><br>
+	<br>
 
 <%
 }

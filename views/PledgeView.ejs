@@ -76,42 +76,80 @@ var ratio_done = pledge.stages.done.amount/total;
 #bar_sections > div:last-child > div{
 	border-right: none;
 }
+
+.button {
+	margin: 50px auto 0 auto;
+	background: #ccc;
+	color: #555;
+	text-align: center;
+	padding: 10px;
+	width:200px;
+	border-radius: 100px;
+	cursor: pointer;
+}
+.button:hover {
+	background: #ddd;
+}
 </style>
 
-<div id="content">
+<%if(pledge.status=="active"){%>
 
-	<div class="header">
-		Thank you, <%=pledge.backer.name%>!
-	</div>
+	<div id="content">
 
-	<b>Your Progress Pledge:</b> ($<%=claimed.toFixed(2)%> claimed out of $<%=total.toFixed(2)%> pledged)
+		<div class="header">
+			Thank you, <%=pledge.backer.name%>!
+		</div>
 
-	<div id="bar">
-		<div id="bar_background"></div>
-		<div id="bar_sections">
-			<div style="width:<%=ratio_demo*800%>px">
-				<div></div>
-				$<%=pledge.stages.demo.amount.toFixed(2)%> upfront
-			</div>
-			<div style="width:<%=ratio_alpha*800%>px">
-				<div></div>
-				$<%=pledge.stages.alpha.amount.toFixed(2)%> for the alpha
-			</div>
-			<div style="width:<%=ratio_beta*800%>px">
-				<div></div>
-				$<%=pledge.stages.beta.amount.toFixed(2)%> for the beta
-			</div>
-			<div style="width:<%=ratio_done*800%>px">
-				<div></div>
-				$<%=pledge.stages.done.amount.toFixed(2)%> when complete
+		<b>Your Progress Pledge:</b> ($<%=claimed.toFixed(2)%> claimed out of $<%=total.toFixed(2)%> pledged)
+
+		<div id="bar">
+			<div id="bar_background"></div>
+			<div id="bar_sections">
+				<div style="width:<%=ratio_demo*800%>px">
+					<div></div>
+					$<%=pledge.stages.demo.amount.toFixed(2)%> upfront
+				</div>
+				<div style="width:<%=ratio_alpha*800%>px">
+					<div></div>
+					$<%=pledge.stages.alpha.amount.toFixed(2)%> for the alpha
+				</div>
+				<div style="width:<%=ratio_beta*800%>px">
+					<div></div>
+					$<%=pledge.stages.beta.amount.toFixed(2)%> for the beta
+				</div>
+				<div style="width:<%=ratio_done*800%>px">
+					<div></div>
+					$<%=pledge.stages.done.amount.toFixed(2)%> when complete
+				</div>
 			</div>
 		</div>
+
+		<%if(claimed==total){%>
+			Many thanks, your progress pledge has been completed!
+		<%}else{%>
+			<div class="button" id="cancel_pledge">CANCEL PLEDGE</div>
+		<%}%>
+
 	</div>
 
-</div>
+	<form style="display:none" id="cancel_pledge_form" action="/pledge/cancel/<%=pledge._id%>" method="POST">
+	</form>
 
-<script>
-window.onload = function(){
-	document.querySelector("#bar_background").style.width = "<%=(claimed/total)*100%>%";
-};
-</script>
+	<script>
+	window.onload = function(){
+		document.querySelector("#bar_background").style.width = "<%=(claimed/total)*100%>%";
+	};
+
+	document.getElementById('cancel_pledge').addEventListener('click', function(e) {
+		var form = document.querySelector("#cancel_pledge_form");
+		form.submit();
+	});
+	</script>
+
+<%}else if(pledge.status=="cancelled"){%>
+
+	<div id="content">
+		Your pledge has been canceled. No further action is required.
+	</div>
+
+<%}%>
