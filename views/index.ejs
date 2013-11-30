@@ -1,152 +1,91 @@
 <style>
-@import url(http://fonts.googleapis.com/css?family=Raleway:300);
+@import url(http://fonts.googleapis.com/css?family=Raleway:300,600);
 body {
 	margin: 0;
 	font-family: Raleway;
 	font-size: 25px;
 }
-#form {
-	width:800px;
-	margin:70px auto;
+#content {
+	width:960px; margin:50px auto;
 }
-#form hr {
+#title {
+	text-align:center; font-size:50px;
+	width:100%; height:50px;
+	padding:40px 0; margin-top: 50px;
+	background:#000; color:#fff
+}
+#fundraiser {
+	width:800px; margin:50px auto;
+}
+
+#bar {
+	width:800px;
+	height:50px;
+	overflow: hidden;
+	margin: 15px 0;
+	position: relative;
+	border-radius: 25px;
+
+	background:#000;
+}
+#bar > div {
+	position: absolute;
+}
+#bar_background {
+
+	width:0%; height:50px;
+	overflow: hidden;
+
+	-webkit-transition: width 2s ease-in-out;
+    -moz-transition: width 2s ease-in-out;
+    -ms-transition: width 2s ease-in-out;
+    -o-transition: width 2s ease-in-out;
+    transition: width 2s ease-in-out;
+
+}
+#bar_background > div {
+	overflow: hidden;
+	width:800px;
+	height:100%;
+}
+#bar_background > div > div {
+	float: left;
+	background: #CC2727;
+	height:100%;
+}
+
+hr {
 	border: none;
 	border-bottom: 2px dashed #ddd;
 }
-#form .header {
-	margin-bottom: 10px;
-}
-#form .button {
-	float:left;
-	background: #000;
-	color: #fff;
-	text-align: center;
-	padding: 10px;
-	width:200px;
-	margin-right: 10px;
-	border-radius: 100px;
-	cursor: pointer;
-}
-#form .button:hover {
-	background: #555;
-}
-#form .text_input {
-	padding:5px; font-size:25px; font-family:Raleway; width:100%
-}
+
 </style>
 
-<div style="text-align:center; font-size:50px; width:100%; height:50px; padding:25px 0; margin-top: 50px; background:#000; color:#fff">
-	[TEST] PROGRESS PLEDGES
+<div id="title">
+	PROGRESS PLEDGE PROTOTYPE
 </div>
 
-<div id="form">
-
-	<form id="progress_pledge" action="/pledge" method="POST">
-
-		<!-- HIDDEN INPUTS -->
-		<input style="display:none" name="stripeToken"></input>
-
-		<!-- BACKER INFORMATION -->
-
-		<div class="header">
-			Hi! What's your name? (If you want to be credited in the leaderboard)
+<div id="fundraiser">
+	<div id="bar">
+		<div id="bar_background">
+			<div>
+				<div style="width:150px"></div>
+				<div style="width:75px; opacity:0.8"></div>
+				<div style="width:75px; opacity:0.6"></div>
+				<div style="width:100px; opacity:0.4"></div>
+			</div>
 		</div>
-		<input type="text" name="backer_name" class="text_input" placeholder="Anonymous"></input>
-		
-		<br><br>
-
-		<div class="header">
-			What's your email? <i>(Please double check!)</i>
-		</div>
-		<!--You will only be sent notifications if/when a part of your pledge is claimed.-->
-		<input type="email" name="backer_email" class="text_input" placeholder="your@email.com"></input>
-		
-		<br><br><hr><br>
-
-		<!-- PLEDGE INFORMATION -->
-
-		<div class="header">
-			How would you like to split up your Progress Pledge?
-		</div>
-		<input type="radio" name="pledge_split" value="quarter" checked> 25% upfront, 25% for alpha, 25% for beta, 25% for full game
-		<br>
-		<input type="radio" name="pledge_split" value="half"> 50% upfront, 50% for full game
-		<br>
-		<input type="radio" name="pledge_split" value="all"> 100% upfront
-
-		<br><br>
-
-		<div class="header">
-			How much would you like to pledge in total?
-		</div>
-		<input type="radio" name="pledge_total" value="10" checked> $10
-		<br>
-		<input type="radio" name="pledge_total" value="25"> $25
-		<br>
-		<input type="radio" name="pledge_total" value="50"> $50
-		<br>
-		<input type="radio" name="pledge_total" value="100"> $100
-
-		<span style="display:none">
-			<br>
-			<input type="radio" name="pledge_total" value="custom">
-			$<input type="text" name="pledge_total_custom" class="text_input" value="" style="width:200px"></input>
-			($2 minimum, due to Stripe's minimum limit)
-		</span>
-		
-		<br><br><hr><br>
-
-		<!-- PAYMENT METHODS -->
-
-		<div class="header">
-			Alright alright alright, let's pledge this!
-			<br>(note: can only do 100% upfront pledges with paypal & bitcoin)
-		</div>
-
-		<div style="overflow:hidden">
-			<div class="button" id="credit_card">Credit Card</div>
-			<div class="button" style="opacity:0.2">PayPal</div>
-			<div class="button" style="opacity:0.2">Bitcoin</div>
-		</div>
-		<div style="font-size:15px">
-			<br>
-			use the test credit card:<br>
-			card: 4242 4242 4242 4242<br>
-			expires: 12/34<br>
-			cvc: 123<br>
-		</div>
-
-	</form>
+	</div>
 </div>
 
+<hr>
 
-<script src="https://checkout.stripe.com/checkout.js"></script>
+<div id="content">
+	<iframe src="/pledge" style="border:0; width:100%; height:1000px;"></iframe>
+</div>
+
 <script>
-
-var handler = StripeCheckout.configure({
-	key: "<%=STRIPE_PUBLIC_KEY%>",
-	image: "http://placekitten.com/128/128",
-	token: function(token, args) {
-		var form = document.querySelector("#progress_pledge");
-		document.querySelector("input[name=stripeToken]").value = token.id;
-		form.submit();
-	}
-});
-
-document.getElementById('credit_card').addEventListener('click', function(e) {
-
-	var backer_email = document.getElementsByName("backer_email")[0].value;
-
-	// Open Checkout with further options
-	handler.open({
-		name: 'Nothing To Hide',
-		description: "you won't be charged right now",
-		email: backer_email,
-		panelLabel: "Pledge!",
-		amount: 0
-	});
-
-});
-
+	window.onload = function(){
+		document.querySelector("#bar_background").style.width = "400px";
+	};
 </script>
-

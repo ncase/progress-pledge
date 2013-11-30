@@ -15,7 +15,30 @@ domain.run(function(){
 
     // Homepage
     app.get("/",function(req,res){
-        res.render("index.ejs",{
+        
+        res.render("index.ejs");
+        
+        mongo.connect(MONGO_URI, function(err, db) {
+            if(err){ return console.error(err); }
+            
+            db.collection('pledges').find(query).toArray(function(err,results){
+                if(err) { return console.error(err); }
+                
+                var pledge = results[0];
+                res.render("PledgeView.ejs",{
+                    pledge: pledge
+                });
+
+                db.close();
+
+            });
+
+        });
+
+    });
+
+    app.get("/pledge",function(req,res){
+        res.render("PledgeForm.ejs",{
             STRIPE_PUBLIC_KEY: process.env.STRIPE_PUBLIC_KEY
         });
     });
@@ -164,7 +187,7 @@ domain.run(function(){
 
     // Pledge with Stripe
     var stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-    app.post("/pledge",function(req,res){
+    app.post("/pledge/new",function(req,res){
 
         // Backer
         var backer = {
