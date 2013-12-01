@@ -6,6 +6,7 @@ domain.run(function(){
 
     var express = require('express');
     var app = express();
+    app.use('/', express.static('./static'));
     app.use(express.bodyParser());
 
     // Listen
@@ -18,6 +19,7 @@ domain.run(function(){
         
         res.render("index.ejs");
         
+        /*
         mongo.connect(MONGO_URI, function(err, db) {
             if(err){ return console.error(err); }
             
@@ -34,6 +36,7 @@ domain.run(function(){
             });
 
         });
+*/
 
     });
 
