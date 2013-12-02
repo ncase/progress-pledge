@@ -214,6 +214,7 @@ domain.run(function(){
             case "half": ratios = { demo:0.50, alpha:0.00, beta:0.00, done:0.50 }; break;
             case "all": ratios = { demo:1.00, alpha:0.00, beta:0.00, done:0.00 }; break;
         }
+        
         var total = parseFloat(req.body.pledge_total);
         stages.demo.amount = Math.round((ratios.demo*total)*100)/100;
         stages.alpha.amount = Math.round((ratios.alpha*total)*100)/100;

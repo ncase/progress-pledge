@@ -166,20 +166,8 @@ var total = demo+alpha+beta+done;
 		<div class="header">
 			How much would you like to pledge in total?
 		</div>
-		<input type="radio" name="pledge_total" value="10" checked> $10
-		<br>
-		<input type="radio" name="pledge_total" value="25"> $25
-		<br>
-		<input type="radio" name="pledge_total" value="50"> $50
-		<br>
-		<input type="radio" name="pledge_total" value="100"> $100
-
-		<span style="display:none">
-			<br>
-			<input type="radio" name="pledge_total" value="custom">
-			$<input type="text" name="pledge_total_custom" class="text_input" value="" style="width:200px"></input>
-			($2 minimum, due to Stripe's minimum limit)
-		</span>
+		$<input name="pledge_total" id="pledge_total" value="10.00" class="text_input" style="width:100px;"/>
+		($2 minimum, due to Stripe's minimum limit)
 		
 		<br><br><hr><br>
 
