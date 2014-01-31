@@ -16,6 +16,39 @@ domain.run(function(){
 
     // Homepage
     app.get("/",function(req,res){
+
+        mongo.connect(MONGO_URI, function(err, db) {
+            if(err){ return console.error(err); }
+            
+            db.collection('pledges').aggregate({
+                $group:{
+                    _id:'campaign',
+                    demo:{$sum:'$stages.demo.amount'},
+                    alpha:{$sum:'$stages.alpha.amount'},
+                    beta:{$sum:'$stages.beta.amount'},
+                    done:{$sum:'$stages.done.amount'},
+                    backers:{$sum:1}
+                }
+            },function(err,results){
+                if(err) { return console.error(err); }
+            
+                var campaign = results[0];
+                campaign.goal = 500; // HARD CODED
+
+                res.render("Campaign.ejs",{
+                    campaign: campaign
+                });
+
+                db.close();
+
+            });
+
+        });
+
+    });
+
+    // Pledge Page
+    app.get("/pledge",function(req,res){
         
         mongo.connect(MONGO_URI, function(err, db) {
             if(err){ return console.error(err); }
@@ -35,7 +68,7 @@ domain.run(function(){
                 var campaign = results[0];
                 campaign.goal = 500; // HARD CODED
 
-                res.render("index.ejs",{
+                res.render("PledgeCreate.ejs",{
                     STRIPE_PUBLIC_KEY: process.env.STRIPE_PUBLIC_KEY,
                     campaign: campaign
                 });
